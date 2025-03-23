@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Membre;
+use Illuminate\Http\Request;
+
+class MembreController extends Controller
+{
+    /**
+     * Affiche la liste des membres.
+     */
+    public function index()
+    {
+        $membres = Membre::all();
+        return view('membres.index', compact('membres'));
+    }
+
+    /**
+     * Affiche la liste des membres avec CSS.
+     */
+    public function indexCss()
+    {
+        $membres = Membre::all();
+        return view('membres.indexcss', compact('membres'));
+    }
+
+    /**
+     * Affiche le formulaire de création d'un membre.
+     */
+    public function create()
+    {
+        return view('membres.create');
+    }
+
+    /**
+     * Stocke un nouveau membre dans la base de données.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'email' => 'required|email|unique:membres'
+        ]);
+
+        Membre::create($request->all());
+
+        return redirect()->route('membres.index')
+            ->with('success', 'Membre créé avec succès.');
+    }
+
+    /**
+     * Affiche les détails d'un membre spécifique.
+     */
+    public function show(Membre $membre)
+    {
+        return view('membres.show', compact('membre'));
+    }
+
+    /**
+     * Affiche le formulaire d'édition d'un membre.
+     */
+    public function edit(Membre $membre)
+    {
+        return view('membres.edit', compact('membre'));
+    }
+
+    /**
+     * Met à jour les informations d'un membre dans la base de données.
+     */
+    public function update(Request $request, Membre $membre)
+    {
+        $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'email' => 'required|email|unique:membres,email,' . $membre->id
+        ]);
+
+        $membre->update($request->all());
+
+        return redirect()->route('membres.index')
+            ->with('success', 'Membre mis à jour avec succès.');
+    }
+
+    /**
+     * Supprime un membre de la base de données.
+     */
+    public function destroy(Membre $membre)
+    {
+        $membre->delete();
+
+        return redirect()->route('membres.index')
+            ->with('success', 'Membre supprimé avec succès.');
+    }
+}
