@@ -18,9 +18,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('membres.index') }}">Liste des membres</a>
                     </li>
+                    @auth
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('membres.create') }}">Ajouter un membre</a>
                     </li>
+                    @endauth
                 </ul>
                 <ul class="navbar-nav">
                     @guest
@@ -31,6 +33,15 @@
                             <a class="nav-link" href="{{ route('register') }}">Inscription</a>
                         </li>
                     @else
+                        @php
+                            $membre = App\Models\Membre::where('email', auth()->user()->email)->first();
+                        @endphp
+                        
+                        @if($membre)
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('membres.edit', $membre->id) }}">Mon profil</a>
+                            </li>
+                        @endif
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 {{ Auth::user()->name }}

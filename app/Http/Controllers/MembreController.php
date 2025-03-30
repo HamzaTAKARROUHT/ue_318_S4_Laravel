@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Membre;
+use App\Models\Biographie;
 use Illuminate\Http\Request;
 
 class MembreController extends Controller
@@ -115,6 +116,32 @@ class MembreController extends Controller
         ->with('success', 'Membre mis à jour avec succès.');
     }
 
+    public function monProfil()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+        
+        $membre = Membre::where('email', auth()->user()->email)->first();
+        
+        if (!$membre) {
+            $name_parts = explode(' ', auth()->user()->name, 2);
+            $prenom = $name_parts[0];
+            $nom = isset($name_parts[1]) ? $name_parts[1] : '';
+            
+            $membre = Membre::create([
+                'nom' => $nom,
+                'prenom' => $prenom,
+                'email' => auth()->user()->email,
+            ]);
+            
+            return redirect()->route('membres.show', $membre->id)
+                ->with('success', 'Votre profil de membre a été créé automatiquement.');
+        }
+        
+        return redirect()->route('membres.show', $membre->id);
+    }
+    
     public function notFound()
     {
      return view('errors.membre-not-found');
