@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,4 +13,9 @@ class Membre extends Model
         'prenom',
         'email'
     ];
+
+    public function biographie()
+    {
+        return $this->hasOne(Biographie::class);
+    }
 }

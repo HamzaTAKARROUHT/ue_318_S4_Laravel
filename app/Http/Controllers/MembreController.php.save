@@ -6,21 +6,22 @@ use App\Models\Membre;
 use Illuminate\Http\Request;
 
 class MembreController extends Controller
-{
-    /**
-     * Affiche la liste des membres.
-     */
-    public function index()
-    {
-        $membres = Membre::all();
-        if (!auth()->check()) {
+if (!auth()->check()) {
         foreach ($membres as $membre) {
             $membre->email = '***@***.***';
         }
     }
     
     return view('membres.index', compact('membres'));
-}
+}{
+    /**
+     * Affiche la liste des membres.
+     */
+    public function index()
+    {
+        $membres = Membre::all();
+        return view('membres.index', compact('membres'));
+    }
 
     /**
      * Affiche la liste des membres avec CSS.
@@ -69,12 +70,7 @@ class MembreController extends Controller
      */
     public function edit(Membre $membre)
     {
-            if (!auth()->check() || auth()->user()->email !== $membre->email) {
-        return redirect()->route('membres.index')
-            ->with('error', 'Vous n\'êtes pas autorisé à modifier ce membre.');
-    	}
-    
-    	return view('membres.edit', compact('membre'));
+        return view('membres.edit', compact('membre'));
     }
 
     /**
@@ -82,43 +78,18 @@ class MembreController extends Controller
      */
     public function update(Request $request, Membre $membre)
     {
-    if (!auth()->check() || auth()->user()->email !== $membre->email) {
+        $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'email' => 'required|email|unique:membres,email,' . $membre->id
+        ]);
+
+        $membre->update($request->all());
+
         return redirect()->route('membres.index')
-            ->with('error', 'Vous n\'êtes pas autorisé à modifier ce membre.');
-    		}
-    
-    $request->validate([
-        'nom' => 'required',
-        'prenom' => 'required',
-        'email' => 'required|email|unique:membres,email,' . $membre->id,
-        'description' => 'nullable'
-    ]);
-    
-    $membre->update([
-        'nom' => $request->nom,
-        'prenom' => $request->prenom,
-        'email' => $request->email,
-    ]);
-    
-    if ($request->has('description')) {
-        if ($membre->biographie) {
-            $membre->biographie->update(['description' => $request->description]);
-        } else {
-            Biographie::create([
-                'membre_id' => $membre->id,
-                'description' => $request->description
-            ]);
-        }
-    }
-    
-    return redirect()->route('membres.show', $membre->id)
-        ->with('success', 'Membre mis à jour avec succès.');
+            ->with('success', 'Membre mis à jour avec succès.');
     }
 
-    public function notFound()
-    {
-     return view('errors.membre-not-found');
-    }
     /**
      * Supprime un membre de la base de données.
      */
